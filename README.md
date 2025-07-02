@@ -4,7 +4,7 @@ This project is a static front-end prototype of a spreadsheet application built 
 
 ## Live Demo
 
-[View the live demo here](https://moinkhanjsx.github.io/spreadsheet-prototype-dist/public)
+[View the live demo here](https://moinkhanjsx.github.io/Moin-khan-assignment/)
 
 ## Features
 

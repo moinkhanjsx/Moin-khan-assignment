@@ -5,6 +5,7 @@ import { resolve } from 'path';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  base: './', // Ensures assets are loaded correctly on GitHub Pages
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
