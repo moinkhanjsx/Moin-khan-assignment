@@ -6,6 +6,11 @@ This project is a static front-end prototype of a spreadsheet application built 
 
 [View the live demo here](https://moinkhanjsx.github.io/Moin-khan-assignment/)
 
+## Deployment Options
+
+- **Primary Deployment (GitHub Pages)**: [https://moinkhanjsx.github.io/Moin-khan-assignment/](https://moinkhanjsx.github.io/Moin-khan-assignment/)
+- **Source Code Repository**: [https://github.com/moinkhanjsx/Moin-khan-assignment](https://github.com/moinkhanjsx/Moin-khan-assignment)
+
 ## Features
 
 - Excel/Google Sheets-like UI and interactions
