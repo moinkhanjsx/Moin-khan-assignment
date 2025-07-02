@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "vite --host",
-    "build": "vite build",
+    "build": "vite build || bash ./render-build.sh",
     "build:full": "tsc && vite build",
+    "build:render": "bash ./render-build.sh",
     "serve": "vite preview",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx src/",
     "type-check": "tsc --noEmit"
