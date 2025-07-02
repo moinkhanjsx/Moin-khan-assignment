@@ -1,7 +1,0 @@
-{
-  "name": "static-site",
-  "version": "1.0.0",
-  "scripts": {
-    "build": "echo '<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Redirecting to project</title><meta http-equiv=\"refresh\" content=\"0; URL=https://spreadsheet-prototype-git-main-moinkhanjsxs-projects.vercel.app/\"></meta></head><body><p>Redirecting to <a href=\"https://spreadsheet-prototype-git-main-moinkhanjsxs-projects.vercel.app/\">https://spreadsheet-prototype-git-main-moinkhanjsxs-projects.vercel.app/</a></p></body></html>' > index.html"
-  }
-}

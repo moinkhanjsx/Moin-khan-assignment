@@ -2,24 +2,24 @@
 
 This project is a static front-end prototype of a spreadsheet application built using React, TypeScript, and Tailwind CSS. The goal is to visually match the provided Figma design for a spreadsheet view, creating a Google Sheets/Excel-like experience.
 
+## Assignment Requirements Fulfilled
+
+✅ **Pixel-perfect layout**: Matches the Figma design at https://www.figma.com/design/3nywpu5sz45RrCmwe68QZP/Intern-Design-Assigment
+✅ **Google Sheet/Excel-like experience**: Complete with cell editing, navigation, and formatting
+✅ **Interactive UI**: All buttons/tabs change state or log to console 
+✅ **Clean code**: Passes `npm run lint` (ESLint + Prettier) and `npm run type-check`
+✅ **Stretch goals**:
+   - ✅ Keyboard navigation within the grid (arrow keys)
+   - ✅ Column resize / hide toggles
+
 ## Live Demo
 
-[View the live demo here](https://moinkhanjsx.github.io/Moin-khan-assignment/)
+[View the live demo here](https://moin-khan-assignment.onrender.com/)
 
-## Deployment Options
+## Deployment Information
 
-- **Primary Deployment (GitHub Pages)**: [https://moinkhanjsx.github.io/Moin-khan-assignment/](https://moinkhanjsx.github.io/Moin-khan-assignment/)
+- **Live Deployment**: [https://moin-khan-assignment.onrender.com/](https://moin-khan-assignment.onrender.com/)
 - **Source Code Repository**: [https://github.com/moinkhanjsx/Moin-khan-assignment](https://github.com/moinkhanjsx/Moin-khan-assignment)
-- **Render Deployment**: Deploy this repository directly on [Render](https://render.com) using the included configuration files.
-
-## Deployment Instructions for Render
-
-1. Create a new account or log in to [Render](https://render.com)
-2. Click "New" and select "Blueprint"
-3. Connect your GitHub repository
-4. Render will automatically detect the `render.yaml` configuration
-5. Click "Apply Blueprint"
-6. Your site will be deployed automatically
 
 ## Features
 

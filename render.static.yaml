@@ -1,6 +1,0 @@
-services:
-  - type: web
-    name: spreadsheet-prototype-static
-    runtime: static
-    buildCommand: echo "Static site, no build needed"
-    staticPublishPath: ./_static
