@@ -1,9 +1,10 @@
 {
-  "version": 2,
-  "public": true,
-  "github": {
-    "silent": true
-  },
-  "buildCommand": null,
-  "outputDirectory": "dist"
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "destination": "https://moinkhanjsx.github.io/Moin-khan-assignment/"
+    }
+  ]
 }
