@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --cell-min-width: 120px;
+  --cell-height: 36px;
+  --border-color: #e5e7eb;
+  --header-bg: #f9fafb;
+  --selected-cell-color: #dbeafe;
+  --selected-cell-border: #3b82f6;
+  --status-in-process: #fef3c7;
+  --status-need-to-start: #dbeafe;
+  --status-complete: #d1fae5;
+  --status-blocked: #fee2e2;
+  --priority-high: #ef4444;
+  --priority-medium: #eab308;
+  --priority-low: #3b82f6;
+}
+
+body {
+  @apply bg-gray-50 text-gray-800 font-sans antialiased;
+}
+
+.spreadsheet-container {
+  @apply h-[calc(100vh-136px)] flex flex-col overflow-hidden;
+}
+
+.spreadsheet {
+  @apply flex-1 flex flex-col overflow-hidden;
+}
+
+.spreadsheet-body {
+  @apply flex-1 overflow-auto;
+}
+
+/* Hide scrollbars on Windows */
+.spreadsheet-body::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.spreadsheet-body::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+.spreadsheet-body::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full;
+}
+
+.spreadsheet-body::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400;
+}
+
+/* Status pill styles */
+.status-pill {
+  @apply px-2 py-1 rounded-md text-xs font-medium;
+}
+
+.status-in-process {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.status-need-to-start {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.status-complete {
+  @apply bg-green-100 text-green-800;
+}
+
+.status-blocked {
+  @apply bg-red-100 text-red-800;
+}
+
+/* Priority styles */
+.priority-high {
+  @apply text-red-600 font-medium;
+}
+
+.priority-medium {
+  @apply text-yellow-600 font-medium;
+}
+
+.priority-low {
+  @apply text-blue-600 font-medium;
+}
+
+/* Custom button reset */
+button {
+  @apply bg-transparent border-none;
+}
