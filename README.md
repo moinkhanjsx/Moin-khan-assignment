@@ -8,12 +8,15 @@ This project is a static front-end prototype of a spreadsheet application built 
 - Cell editing with double-click and state persistence
 - Dropdown selects for status and priority fields
 - Visual styling for status (color-coded pills) and priority
-- Column visibility toggle UI
+- Column visibility toggle UI with dropdown menu
+- Column resizing with drag handles
 - Keyboard navigation (arrow keys, tab)
 - Interactive UI elements that log to console:
   - Toolbar buttons (Import, Export, Share, New Action)
   - Filter/Sort/Hide Fields buttons
   - Cell edits (values are both logged and persisted in state)
+  - Column visibility toggles
+  - Column resizing
 - Responsive design that adapts to different screen sizes
 - Clean and modern UI using Tailwind CSS for styling
 
@@ -88,5 +91,3 @@ To get a local copy up and running, follow these steps:
 - CSV/Excel import/export functionality
 - Cell range selection
 - Virtual scrolling for large datasets
-- Full implementation of column resize/hide functionality# Moin-khan-assignment
-# Moin-khan-assignment

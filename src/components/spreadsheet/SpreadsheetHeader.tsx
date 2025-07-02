@@ -1,25 +1,54 @@
-import React, { useState, useRef } from 'react';
-import { ColumnData } from '../../types/spreadsheet';
+import React, { useState, useRef, useEffect } from 'react';
 
 interface SpreadsheetHeaderProps {
-  columns: ColumnData[];
-  onResizeColumn: (columnId: string, width: number) => void;
+  columns: string[];
+  visibleColumns: string[];
+  onResizeColumn?: (columnId: string, width: number) => void;
   onToggleColumnVisibility: (columnId: string) => void;
 }
 
+const columnLabels: Record<string, string> = {
+  id: '#',
+  jobRequest: 'Job Request',
+  submitted: 'Submitted',
+  status: 'Status',
+  submitter: 'Submitter',
+  url: 'URL',
+  assigned: 'Assigned',
+  priority: 'Priority',
+  dueDate: 'Due Date',
+  estValue: 'Est. Value',
+};
+
 const SpreadsheetHeader: React.FC<SpreadsheetHeaderProps> = ({
   columns,
+  visibleColumns,
   onResizeColumn,
   onToggleColumnVisibility
 }) => {
   const [resizingColumn, setResizingColumn] = useState<string | null>(null);
   const [startX, setStartX] = useState<number>(0);
   const [startWidth, setStartWidth] = useState<number>(0);
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({
+    id: 40,
+    jobRequest: 240,
+    submitted: 120,
+    status: 120,
+    submitter: 120,
+    url: 120,
+    assigned: 120,
+    priority: 120,
+    dueDate: 120,
+    estValue: 120,
+  });
+  
   const headerRef = useRef<HTMLDivElement>(null);
 
   // Start column resize
-  const handleResizeStart = (e: React.MouseEvent, columnId: string, currentWidth: number) => {
+  const handleResizeStart = (e: React.MouseEvent, columnId: string) => {
     e.preventDefault();
+    const currentWidth = columnWidths[columnId] || 120;
+    
     setResizingColumn(columnId);
     setStartX(e.clientX);
     setStartWidth(currentWidth);
@@ -33,8 +62,15 @@ const SpreadsheetHeader: React.FC<SpreadsheetHeaderProps> = ({
     if (!resizingColumn) return;
     
     const diff = e.clientX - startX;
-    const newWidth = Math.max(50, startWidth + diff); // Minimum width of 50px
+    const newWidth = Math.max(40, startWidth + diff); // Minimum width of 40px
     
+    // Update column width state
+    setColumnWidths(prev => ({
+      ...prev,
+      [resizingColumn]: newWidth
+    }));
+    
+    // Update the DOM immediately for smooth resizing
     if (headerRef.current) {
       const columnElement = headerRef.current.querySelector(`[data-column-id="${resizingColumn}"]`);
       if (columnElement) {
@@ -47,8 +83,30 @@ const SpreadsheetHeader: React.FC<SpreadsheetHeaderProps> = ({
   const handleResizeEnd = (e: MouseEvent) => {
     if (resizingColumn) {
       const diff = e.clientX - startX;
-      const newWidth = Math.max(50, startWidth + diff);
-      onResizeColumn(resizingColumn, newWidth);
+      const newWidth = Math.max(40, startWidth + diff);
+      
+      // Update final width state
+      setColumnWidths(prev => {
+        const updatedWidths = {
+          ...prev,
+          [resizingColumn]: newWidth
+        };
+        
+        // Update the grid template columns
+        const root = document.documentElement;
+        const templateColumns = columns
+          .filter(col => visibleColumns.includes(col))
+          .map(col => `${updatedWidths[col] || 120}px`)
+          .join(' ');
+        
+        root.style.setProperty('--grid-template-columns', templateColumns);
+        
+        return updatedWidths;
+      });
+      
+      if (onResizeColumn) {
+        onResizeColumn(resizingColumn, newWidth);
+      }
       
       setResizingColumn(null);
     }
@@ -57,35 +115,49 @@ const SpreadsheetHeader: React.FC<SpreadsheetHeaderProps> = ({
     document.removeEventListener('mouseup', handleResizeEnd);
   };
 
-  // Toggle column visibility
-  const handleToggleVisibility = (columnId: string) => {
-    onToggleColumnVisibility(columnId);
-  };
+  // Apply column widths to CSS custom properties for grid layout
+  useEffect(() => {
+    const root = document.documentElement;
+    
+    // Build the grid-template-columns value based on visible columns
+    if (columns && visibleColumns) {
+      const templateColumns = columns
+        .filter(col => visibleColumns.includes(col))
+        .map(col => `${columnWidths[col] || 120}px`)
+        .join(' ');
+      
+      root.style.setProperty('--grid-template-columns', templateColumns);
+    }
+    
+    // Also set individual column width properties
+    Object.entries(columnWidths).forEach(([columnId, width]) => {
+      root.style.setProperty(`--col-${columnId}-width`, `${width}px`);
+    });
+  }, [columnWidths, columns, visibleColumns]);
 
   return (
-    <div className="flex" ref={headerRef}>
-      {/* Empty corner cell */}
-      <div className="w-10 bg-gray-100 border border-gray-200" />
-      
-      {/* Column headers */}
-      {columns.map(column => (
+    <div className="grid-table-header" ref={headerRef}>
+      {columns.filter(col => visibleColumns.includes(col)).map((column) => (
         <div
-          key={column.id}
-          className="relative flex items-center justify-center bg-gray-100 border border-gray-200 font-medium p-2 select-none"
-          style={{ width: `${column.width}px`, minWidth: `${column.width}px` }}
-          data-column-id={column.id}
+          key={column}
+          className={`relative flex items-center p-2 text-xs font-medium text-gray-700 border-r border-gray-200 ${column === 'id' ? 'sticky left-0 bg-gray-50 z-10' : ''}`}
+          style={{ width: `${columnWidths[column]}px`, minWidth: `${columnWidths[column]}px` }}
+          data-column-id={column}
         >
-          <div className="flex-1 text-center">{column.title}</div>
+          <div className="flex-1">
+            {columnLabels[column] || column}
+          </div>
           
-          {/* Column options menu trigger */}
-          <div className="absolute right-0 top-0 h-full flex items-center px-1">
+          {/* Column options */}
+          <div className="flex items-center space-x-1">
             <button
-              className="text-gray-500 hover:text-gray-700 p-1"
-              onClick={() => handleToggleVisibility(column.id)}
-              title="Toggle visibility"
+              className="text-gray-400 hover:text-gray-700 p-1 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+              onClick={() => onToggleColumnVisibility(column)}
+              title="Toggle column visibility"
             >
-              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
               </svg>
             </button>
           </div>
@@ -93,7 +165,7 @@ const SpreadsheetHeader: React.FC<SpreadsheetHeaderProps> = ({
           {/* Resize handle */}
           <div
             className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-blue-500 group"
-            onMouseDown={(e) => handleResizeStart(e, column.id, column.width)}
+            onMouseDown={(e) => handleResizeStart(e, column)}
           >
             <div className="hidden group-hover:block absolute right-0 top-0 h-full w-1 bg-blue-500" />
           </div>

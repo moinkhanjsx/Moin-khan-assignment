@@ -1,4 +1,4 @@
-import { ColumnData, RowData, CellData } from '../types/spreadsheet';
+import { ColumnData, RowData } from '../types/spreadsheet';
 
 // Generate column headers (A, B, C, ..., Z, AA, AB, ...)
 export const generateColumnLabel = (index: number): string => {

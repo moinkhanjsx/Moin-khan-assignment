@@ -34,6 +34,42 @@ body {
   @apply flex-1 overflow-auto;
 }
 
+/* Selected cell style */
+.cell-selected {
+  @apply bg-blue-100 outline outline-2 outline-blue-500 z-10 relative;
+}
+
+/* Grid layout classes for dynamic column visibility */
+.grid-table-header {
+  @apply grid bg-gray-50 border-b border-gray-200;
+  display: grid;
+  grid-template-columns: var(--grid-template-columns);
+  min-width: 100%;
+  width: max-content;
+}
+
+.grid-table-row {
+  @apply grid border-b border-gray-200 hover:bg-gray-50;
+  display: grid;
+  grid-template-columns: var(--grid-template-columns);
+  min-width: 100%;
+  width: max-content;
+}
+
+/* ID column (first column) is narrower */
+.grid-table-header > div[data-column-id="id"],
+.grid-table-row > div:first-child {
+  min-width: var(--col-id-width, 40px);
+  width: var(--col-id-width, 40px);
+}
+
+/* Job Request column is wider */
+.grid-table-header > div[data-column-id="jobRequest"],
+.grid-table-row > div:nth-child(2) {
+  min-width: var(--col-jobRequest-width, 240px);
+  width: var(--col-jobRequest-width, 240px);
+}
+
 /* Hide scrollbars on Windows */
 .spreadsheet-body::-webkit-scrollbar {
   width: 8px;
@@ -89,4 +125,23 @@ body {
 /* Custom button reset */
 button {
   @apply bg-transparent border-none;
+}
+
+/* Column visibility menu animation */
+.column-menu-enter {
+  opacity: 0;
+  transform: scale(0.9);
+}
+.column-menu-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 200ms, transform 200ms;
+}
+.column-menu-exit {
+  opacity: 1;
+}
+.column-menu-exit-active {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 200ms, transform 200ms;
 }

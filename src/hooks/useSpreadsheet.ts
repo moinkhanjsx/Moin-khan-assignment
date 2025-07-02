@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { CellData, RowData, ColumnData, CellPosition, SpreadsheetData } from '../types/spreadsheet';
+import React, { useState, useEffect, useCallback } from 'react';
+import { RowData, ColumnData, CellPosition } from '../types/spreadsheet';
 import { generateColumns, generateEmptyData } from '../utils/spreadsheet';
 
 export const useSpreadsheet = () => {
@@ -34,12 +34,17 @@ export const useSpreadsheet = () => {
     }, []);
 
     // Handle keyboard navigation
-    const handleKeyNavigation = useCallback((e: any) => {
+    const handleKeyNavigation = useCallback((e: React.KeyboardEvent | KeyboardEvent) => {
         if (!selectedCell) return;
 
         const { row, col } = selectedCell;
         let newRow = row;
         let newCol = col;
+
+        // Prevent default behavior for navigation keys
+        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'].includes(e.key)) {
+            e.preventDefault();
+        }
 
         switch (e.key) {
             case 'ArrowUp':
@@ -55,7 +60,6 @@ export const useSpreadsheet = () => {
                 newCol = Math.min(columns.length - 1, col + 1);
                 break;
             case 'Tab':
-                e.preventDefault();
                 if (e.shiftKey) {
                     // Move to previous cell or previous row's last cell
                     if (col > 0) {
@@ -74,12 +78,27 @@ export const useSpreadsheet = () => {
                     }
                 }
                 break;
+            case 'Enter':
+                if (e.shiftKey) {
+                    // Move up
+                    newRow = Math.max(0, row - 1);
+                } else {
+                    // Move down
+                    newRow = Math.min(data.length - 1, row + 1);
+                }
+                break;
             default:
-                return;
+                return; // Return without setting a new selected cell
         }
 
         if (newRow !== row || newCol !== col) {
             setSelectedCell({ row: newRow, col: newCol });
+            
+            // Ensure the cell is visible by scrolling to it
+            const cellElement = document.querySelector(`[data-row="${newRow}"][data-col="${newCol}"]`);
+            if (cellElement) {
+                cellElement.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+            }
         }
     }, [selectedCell, data.length, columns.length]);
 

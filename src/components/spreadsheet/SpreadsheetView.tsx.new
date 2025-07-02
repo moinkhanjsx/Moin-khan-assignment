@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { useSpreadsheet } from '../../hooks/useSpreadsheet';
 import ColumnVisibilityMenu from './ColumnVisibilityMenu';
 import SpreadsheetHeader from './SpreadsheetHeader';
@@ -20,8 +20,8 @@ interface Task {
 const SpreadsheetView: React.FC = () => {
   const { 
     selectedCell, 
-    handleCellSelect,
-    // Remove the unused handleKeyNavigation
+    handleCellSelect, 
+    handleKeyNavigation
   } = useSpreadsheet();
   
   const spreadsheetRef = useRef<HTMLDivElement>(null);
@@ -139,7 +139,7 @@ const SpreadsheetView: React.FC = () => {
   };
   
   // Function to update the grid template columns
-  const updateGridTemplate = useCallback((visibleCols: string[]) => {
+  const updateGridTemplate = (visibleCols: string[]) => {
     const root = document.documentElement;
     const templateColumns = allColumns
       .filter(col => visibleCols.includes(col))
@@ -147,103 +147,7 @@ const SpreadsheetView: React.FC = () => {
       .join(' ');
     
     root.style.setProperty('--grid-template-columns', templateColumns);
-  }, [allColumns, columnWidths]);
-
-  // Helper function to check if a cell is selected
-  const isCellSelected = (row: number, col: number) => {
-    return selectedCell && selectedCell.row === row && selectedCell.col === col;
   };
-  
-  // Helper to get the next/previous valid column index considering visibility
-  const getNextVisibleColumnIndex = (currentCol: number, direction: 'next' | 'prev') => {
-    const visibleCols = allColumns.filter(col => visibleColumns.includes(col));
-    const currentVisibleIndex = visibleCols.indexOf(allColumns[currentCol]);
-    
-    if (currentVisibleIndex === -1) return currentCol; // Not found
-    
-    if (direction === 'next') {
-      if (currentVisibleIndex < visibleCols.length - 1) {
-        return allColumns.indexOf(visibleCols[currentVisibleIndex + 1]);
-      }
-    } else { // prev
-      if (currentVisibleIndex > 0) {
-        return allColumns.indexOf(visibleCols[currentVisibleIndex - 1]);
-      }
-    }
-    
-    return currentCol; // No change if at boundary
-  };
-  
-  // Custom keyboard navigation handler that respects column visibility
-  const handleCustomKeyNavigation = useCallback((e: React.KeyboardEvent | KeyboardEvent) => {
-    if (!selectedCell) return;
-    
-    const { row, col } = selectedCell;
-    let newRow = row;
-    let newCol = col;
-    
-    // Prevent default browser scrolling behavior
-    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'].includes(e.key)) {
-      e.preventDefault();
-    }
-    
-    switch (e.key) {
-      case 'ArrowUp':
-        newRow = Math.max(0, row - 1);
-        break;
-      case 'ArrowDown':
-        newRow = Math.min(mockTasks.length + 19, row + 1); // +19 for empty rows
-        break;
-      case 'ArrowLeft':
-        newCol = getNextVisibleColumnIndex(col, 'prev');
-        break;
-      case 'ArrowRight':
-        newCol = getNextVisibleColumnIndex(col, 'next');
-        break;
-      case 'Tab':
-        if (e.shiftKey) {
-          // Move to previous visible cell or previous row's last visible cell
-          newCol = getNextVisibleColumnIndex(col, 'prev');
-          if (newCol === col && row > 0) {
-            newRow = row - 1;
-            // Get the last visible column
-            const visibleCols = allColumns.filter(col => visibleColumns.includes(col));
-            newCol = allColumns.indexOf(visibleCols[visibleCols.length - 1]);
-          }
-        } else {
-          // Move to next visible cell or next row's first visible cell
-          newCol = getNextVisibleColumnIndex(col, 'next');
-          if (newCol === col && row < mockTasks.length + 19) {
-            newRow = row + 1;
-            // Get the first visible column
-            const visibleCols = allColumns.filter(col => visibleColumns.includes(col));
-            newCol = allColumns.indexOf(visibleCols[0]);
-          }
-        }
-        break;
-      case 'Enter':
-        if (e.shiftKey) {
-          newRow = Math.max(0, row - 1);
-        } else {
-          newRow = Math.min(mockTasks.length + 19, row + 1);
-        }
-        break;
-      default:
-        return; // Do nothing for other keys
-    }
-    
-    if (newRow !== row || newCol !== col) {
-      handleCellSelect({ row: newRow, col: newCol });
-      
-      // Ensure the cell is visible by scrolling to it
-      setTimeout(() => {
-        const cellElement = document.querySelector(`[data-row="${newRow}"][data-col="${newCol}"]`);
-        if (cellElement) {
-          cellElement.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-        }
-      }, 0);
-    }
-  }, [selectedCell, mockTasks.length, allColumns, visibleColumns, handleCellSelect, getNextVisibleColumnIndex]);
 
   // Close column menu when clicking outside
   useEffect(() => {
@@ -267,7 +171,7 @@ const SpreadsheetView: React.FC = () => {
   // Initialize grid template columns on component mount and when visibility changes
   useEffect(() => {
     updateGridTemplate(visibleColumns);
-  }, [visibleColumns, columnWidths, updateGridTemplate]);
+  }, [visibleColumns, columnWidths]);
   
   // Add keyboard event listeners for navigation
   useEffect(() => {
@@ -275,7 +179,7 @@ const SpreadsheetView: React.FC = () => {
       // Only handle key events when the spreadsheet is focused or a cell is selected
       if (document.activeElement === spreadsheetRef.current || 
           (document.activeElement && document.activeElement.closest('.spreadsheet-container'))) {
-        handleCustomKeyNavigation(e);
+        handleKeyNavigation(e as any);
       }
     };
 
@@ -284,7 +188,7 @@ const SpreadsheetView: React.FC = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [selectedCell, visibleColumns, handleCustomKeyNavigation]);
+  }, [handleKeyNavigation]);
 
   const getStatusClass = (status: string) => {
     switch(status.toLowerCase()) {
@@ -328,7 +232,6 @@ const SpreadsheetView: React.FC = () => {
       className="spreadsheet-container bg-white border border-gray-300 overflow-auto mt-0 mx-auto w-full shadow-lg" 
       ref={spreadsheetRef}
       tabIndex={0} // Make the container focusable
-      onKeyDown={(e) => handleCustomKeyNavigation(e)}
     >
       {/* Tabs */}
       <div className="flex border-b border-gray-200">
@@ -386,40 +289,24 @@ const SpreadsheetView: React.FC = () => {
       
       {/* Table Rows */}
       <div className="spreadsheet-body">
-        {mockTasks.map((task, rowIndex) => {
-          const isSelected = selectedCell && selectedCell.row === rowIndex;
+        {mockTasks.map((task) => {
+          const isSelected = selectedCell && selectedCell.row === task.id - 1;
           
           return (
             <div 
               key={task.id} 
               className={`grid-table-row ${isSelected ? 'bg-blue-50' : ''}`}
-              onClick={() => handleCellSelect({ row: rowIndex, col: 0 })}
+              onClick={() => handleCellSelect({ row: task.id - 1, col: 0 })}
               tabIndex={0}
-              data-row={rowIndex}
+              onKeyDown={(e) => handleKeyNavigation(e as any)}
             >
               {visibleColumns.includes('id') && 
-                <div 
-                  className={`p-2 text-sm text-gray-600 border-r border-gray-200 w-8 sticky left-0 bg-white ${isCellSelected(rowIndex, 0) ? 'cell-selected' : ''}`}
-                  data-row={rowIndex}
-                  data-col={0}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCellSelect({ row: rowIndex, col: 0 });
-                  }}
-                >
-                  {task.id}
-                </div>
+                <div className="p-2 text-sm text-gray-600 border-r border-gray-200 w-8 sticky left-0 bg-white">{task.id}</div>
               }
               
               {visibleColumns.includes('jobRequest') && 
                 <div 
-                  className={`p-2 text-sm text-gray-800 border-r border-gray-200 col-span-2 cursor-cell ${isCellSelected(rowIndex, 1) ? 'cell-selected' : ''}`}
-                  data-row={rowIndex}
-                  data-col={1}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCellSelect({ row: rowIndex, col: 1 });
-                  }}
+                  className="p-2 text-sm text-gray-800 border-r border-gray-200 col-span-2 cursor-cell"
                   onDoubleClick={() => {
                     const newValue = prompt('Enter new value:', task.jobRequest);
                     if (newValue !== null) {
@@ -434,13 +321,7 @@ const SpreadsheetView: React.FC = () => {
               
               {visibleColumns.includes('submitted') && 
                 <div 
-                  className={`p-2 text-sm text-gray-600 border-r border-gray-200 cursor-cell ${isCellSelected(rowIndex, 2) ? 'cell-selected' : ''}`}
-                  data-row={rowIndex}
-                  data-col={2}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCellSelect({ row: rowIndex, col: 2 });
-                  }}
+                  className="p-2 text-sm text-gray-600 border-r border-gray-200 cursor-cell"
                   onDoubleClick={() => {
                     const newValue = prompt('Enter new date (DD-MM-YYYY):', task.submitted);
                     if (newValue !== null) {
@@ -454,15 +335,7 @@ const SpreadsheetView: React.FC = () => {
               }
               
               {visibleColumns.includes('status') && 
-                <div 
-                  className="p-2 text-sm border-r border-gray-200"
-                  data-row={rowIndex}
-                  data-col={3}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCellSelect({ row: rowIndex, col: 3 });
-                  }}
-                >
+                <div className="p-2 text-sm border-r border-gray-200">
                   <select 
                     className={`px-2 py-1 rounded-md text-xs ${getStatusClass(task.status)} cursor-pointer border-none`}
                     onChange={(e) => {
@@ -470,7 +343,6 @@ const SpreadsheetView: React.FC = () => {
                       updateTaskField(task.id, 'status', e.target.value);
                     }}
                     value={task.status}
-                    onClick={(e) => e.stopPropagation()}
                   >
                     <option value="in-process">In-process</option>
                     <option value="need-to-start">Need to start</option>
@@ -483,12 +355,6 @@ const SpreadsheetView: React.FC = () => {
               {visibleColumns.includes('submitter') && 
                 <div 
                   className="p-2 text-sm text-gray-600 border-r border-gray-200 cursor-cell"
-                  data-row={rowIndex}
-                  data-col={4}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCellSelect({ row: rowIndex, col: 4 });
-                  }}
                   onDoubleClick={() => {
                     const newValue = prompt('Enter submitter name:', task.submitter);
                     if (newValue !== null) {
@@ -504,12 +370,6 @@ const SpreadsheetView: React.FC = () => {
               {visibleColumns.includes('url') && 
                 <div 
                   className="p-2 text-sm text-blue-600 underline border-r border-gray-200 cursor-cell"
-                  data-row={rowIndex}
-                  data-col={5}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCellSelect({ row: rowIndex, col: 5 });
-                  }}
                   onDoubleClick={() => {
                     const newValue = prompt('Enter URL:', task.url);
                     if (newValue !== null) {
@@ -525,12 +385,6 @@ const SpreadsheetView: React.FC = () => {
               {visibleColumns.includes('assigned') && 
                 <div 
                   className="p-2 text-sm text-gray-600 border-r border-gray-200 cursor-cell"
-                  data-row={rowIndex}
-                  data-col={6}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCellSelect({ row: rowIndex, col: 6 });
-                  }}
                   onDoubleClick={() => {
                     const newValue = prompt('Enter assignee name:', task.assigned);
                     if (newValue !== null) {
@@ -544,15 +398,7 @@ const SpreadsheetView: React.FC = () => {
               }
               
               {visibleColumns.includes('priority') && 
-                <div 
-                  className="p-2 text-sm font-medium border-r border-gray-200"
-                  data-row={rowIndex}
-                  data-col={7}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCellSelect({ row: rowIndex, col: 7 });
-                  }}
-                >
+                <div className="p-2 text-sm font-medium border-r border-gray-200">
                   <select 
                     className={`bg-transparent border-none cursor-pointer ${getPriorityClass(task.priority)}`}
                     onChange={(e) => {
@@ -560,7 +406,6 @@ const SpreadsheetView: React.FC = () => {
                       updateTaskField(task.id, 'priority', e.target.value);
                     }}
                     value={task.priority}
-                    onClick={(e) => e.stopPropagation()}
                   >
                     <option value="High">High</option>
                     <option value="Medium">Medium</option>
@@ -572,12 +417,6 @@ const SpreadsheetView: React.FC = () => {
               {visibleColumns.includes('dueDate') && 
                 <div 
                   className="p-2 text-sm text-gray-600 border-r border-gray-200 cursor-cell"
-                  data-row={rowIndex}
-                  data-col={8}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCellSelect({ row: rowIndex, col: 8 });
-                  }}
                   onDoubleClick={() => {
                     const newValue = prompt('Enter due date (DD-MM-YYYY):', task.dueDate);
                     if (newValue !== null) {
@@ -593,12 +432,6 @@ const SpreadsheetView: React.FC = () => {
               {visibleColumns.includes('estValue') && 
                 <div 
                   className="p-2 text-sm text-gray-600 text-right pr-4 cursor-cell"
-                  data-row={rowIndex}
-                  data-col={9}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCellSelect({ row: rowIndex, col: 9 });
-                  }}
                   onDoubleClick={() => {
                     const newValue = prompt('Enter estimated value:', task.estValue);
                     if (newValue !== null) {
@@ -615,28 +448,20 @@ const SpreadsheetView: React.FC = () => {
         })}
         
         {/* Empty rows for demonstration */}
-        {Array.from({ length: 20 }).map((_, index) => {
-          const rowIdx = mockTasks.length + index;
-          return (
-            <div 
-              key={`empty-${index}`} 
-              className="grid-table-row"
-              data-row={rowIdx}
-              onClick={() => handleCellSelect({ row: rowIdx, col: 0 })}
-            >
-            {visibleColumns.includes('id') && <div className="p-2 text-sm text-gray-600 border-r border-gray-200 w-8 sticky left-0 bg-white" data-row={rowIdx} data-col={0}>{mockTasks.length + index + 1}</div>}
-            {visibleColumns.includes('jobRequest') && <div className="p-2 border-r border-gray-200 col-span-2" data-row={rowIdx} data-col={1}></div>}
-            {visibleColumns.includes('submitted') && <div className="p-2 border-r border-gray-200" data-row={rowIdx} data-col={2}></div>}
-            {visibleColumns.includes('status') && <div className="p-2 border-r border-gray-200" data-row={rowIdx} data-col={3}></div>}
-            {visibleColumns.includes('submitter') && <div className="p-2 border-r border-gray-200" data-row={rowIdx} data-col={4}></div>}
-            {visibleColumns.includes('url') && <div className="p-2 border-r border-gray-200" data-row={rowIdx} data-col={5}></div>}
-            {visibleColumns.includes('assigned') && <div className="p-2 border-r border-gray-200" data-row={rowIdx} data-col={6}></div>}
-            {visibleColumns.includes('priority') && <div className="p-2 border-r border-gray-200" data-row={rowIdx} data-col={7}></div>}
-            {visibleColumns.includes('dueDate') && <div className="p-2 border-r border-gray-200" data-row={rowIdx} data-col={8}></div>}
-            {visibleColumns.includes('estValue') && <div className="p-2" data-row={rowIdx} data-col={9}></div>}
+        {Array.from({ length: 20 }).map((_, index) => (
+          <div key={`empty-${index}`} className="grid-table-row">
+            {visibleColumns.includes('id') && <div className="p-2 text-sm text-gray-600 border-r border-gray-200 w-8 sticky left-0 bg-white">{mockTasks.length + index + 1}</div>}
+            {visibleColumns.includes('jobRequest') && <div className="p-2 border-r border-gray-200 col-span-2"></div>}
+            {visibleColumns.includes('submitted') && <div className="p-2 border-r border-gray-200"></div>}
+            {visibleColumns.includes('status') && <div className="p-2 border-r border-gray-200"></div>}
+            {visibleColumns.includes('submitter') && <div className="p-2 border-r border-gray-200"></div>}
+            {visibleColumns.includes('url') && <div className="p-2 border-r border-gray-200"></div>}
+            {visibleColumns.includes('assigned') && <div className="p-2 border-r border-gray-200"></div>}
+            {visibleColumns.includes('priority') && <div className="p-2 border-r border-gray-200"></div>}
+            {visibleColumns.includes('dueDate') && <div className="p-2 border-r border-gray-200"></div>}
+            {visibleColumns.includes('estValue') && <div className="p-2"></div>}
           </div>
-        );
-      })}
+        ))}
       </div>
 
       {/* Tab navigation at the bottom */}
