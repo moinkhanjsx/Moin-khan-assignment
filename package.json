@@ -7,7 +7,8 @@
     "build": "tsc && vite build",
     "serve": "vite preview",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx src/",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "postinstall": "chmod +x ./node_modules/.bin/vite || true"
   },
   "dependencies": {
     "@tanstack/react-table": "^8.21.3",

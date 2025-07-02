@@ -2,6 +2,10 @@
 
 This project is a static front-end prototype of a spreadsheet application built using React, TypeScript, and Tailwind CSS. The goal is to visually match the provided Figma design for a spreadsheet view, creating a Google Sheets/Excel-like experience.
 
+## Live Demo
+
+[View the live demo here](https://your-deployment-url.vercel.app)
+
 ## Features
 
 - Excel/Google Sheets-like UI and interactions
