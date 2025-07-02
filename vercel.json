@@ -1,6 +1,6 @@
 {
   "framework": "vite",
-  "buildCommand": "node build.js",
+  "buildCommand": "node direct-build.js",
   "outputDirectory": "dist",
   "routes": [
     {
