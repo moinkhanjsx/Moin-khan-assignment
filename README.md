@@ -10,6 +10,16 @@ This project is a static front-end prototype of a spreadsheet application built 
 
 - **Primary Deployment (GitHub Pages)**: [https://moinkhanjsx.github.io/Moin-khan-assignment/](https://moinkhanjsx.github.io/Moin-khan-assignment/)
 - **Source Code Repository**: [https://github.com/moinkhanjsx/Moin-khan-assignment](https://github.com/moinkhanjsx/Moin-khan-assignment)
+- **Render Deployment**: Deploy this repository directly on [Render](https://render.com) using the included configuration files.
+
+## Deployment Instructions for Render
+
+1. Create a new account or log in to [Render](https://render.com)
+2. Click "New" and select "Blueprint"
+3. Connect your GitHub repository
+4. Render will automatically detect the `render.yaml` configuration
+5. Click "Apply Blueprint"
+6. Your site will be deployed automatically
 
 ## Features
 
