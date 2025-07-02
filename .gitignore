@@ -8,7 +8,7 @@
 
 # Production
 /build
-/dist
+# /dist - We need to include this for Vercel static deployment
 
 # Misc
 .DS_Store
